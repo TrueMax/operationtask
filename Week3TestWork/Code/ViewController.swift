@@ -41,7 +41,7 @@ class ViewController: UIViewController {
     
     @IBAction func generatePasswordButtonPressed(_ sender: UIButton) {
         clearText()
-        password = passwordGenerate.randomString(length: 32)
+        password = passwordGenerate.randomString(length: 4)
         inputTextField.text = password
         enableStartButton()
     }

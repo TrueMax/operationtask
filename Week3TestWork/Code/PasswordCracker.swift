@@ -28,25 +28,28 @@ class PasswordQueue: OperationQueue {
         - completion: замыкание, в которое асинхронно передаются результаты поиска, вызывающий объект (ViewController) оперирует значениями
      */
     func crack(password searchPass: String, completion: QueueHandler) {
-        var pass: String = ""
+        var pass: String?
         let startTime = Date()
-        var operationArray: Array<BruteForceOperation> = []
+        let startString = "0000"
+        let endString = "ZZZZ"
         
-        for character in searchPass {
-            let op = BruteForceOperation(passwordChar: character)
-            operationArray.append(op)
-        }
+        let op1 = BruteForceOperation(startString: startString, endString: endString, password: searchPass)
+        let op2 = BruteForceOperation(startString: startString, endString: endString, password: searchPass)
+        let op3 = BruteForceOperation(startString: startString, endString: endString, password: searchPass)
         
-        addOperations(operationArray, waitUntilFinished: true)
+        let opArray = [op1, op2, op3]
         
-        operationArray.forEach { operation in
-            guard let r = operation.result else { print("wrong symbol")
-            return }
-            pass += r
-        }
-        if let handler = completion {
-            let time = "\(String(format: "Time: %.2f", Date().timeIntervalSince(startTime))) seconds"
-            handler(pass, time)
+        addOperations(opArray, waitUntilFinished: false)
+        
+        opArray.forEach { operation in
+            operation.completionBlock = { [weak self] in
+                pass = operation.result
+                self?.cancelAllOperations()
+                if let p = pass, let handler = completion {
+                    let time = "\(String(format: "Time: %.2f", Date().timeIntervalSince(startTime))) seconds"
+                    handler(p, time)
+                }
+            }
         }
     }
 }
